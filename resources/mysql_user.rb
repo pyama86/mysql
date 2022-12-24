@@ -260,7 +260,11 @@ action :grant do
   if incorrect_privs
     converge_by "Granting privs for '#{new_resource.username}'@'#{new_resource.host}'" do
       formatted_privileges = new_resource.privileges.map do |p|
-        p.to_s.upcase.tr('_', ' ').gsub('REPL ', 'REPLICATION ').gsub('CREATE TMP TABLE', 'CREATE TEMPORARY TABLES').gsub('SHOW DB', 'SHOW DATABASES')
+        if p.to_s == 'backup_admin'
+          'BACKUP_ADMIN'
+        else
+          p.to_s.upcase.tr('_', ' ').gsub('REPL ', 'REPLICATION ').gsub('CREATE TMP TABLE', 'CREATE TEMPORARY TABLES').gsub('SHOW DB', 'SHOW DATABASES')
+        end
       end
       repair_sql = "GRANT #{formatted_privileges.join(',')}"
       repair_sql << " ON #{db_name}.#{tbl_name}"
